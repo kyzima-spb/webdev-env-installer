@@ -341,10 +341,6 @@ setupPHP()
         mkdir -p /var/log/php-fpm
     fi
 
-    if [ ! -f "/tmp/php-fpm" ]; then
-        mkdir -p /tmp/php-fpm
-    fi
-
 
     local poolsPath=$installationPath/fpm/pool.d
     local poolName
@@ -355,8 +351,6 @@ setupPHP()
 
         if [ ! -f "$poolsPath/$poolName.conf" ]; then
             cp $F $poolsPath
-            mkdir -p /tmp/php-fpm/$poolName
-            chown www-data:www-data /tmp/php-fpm/$poolName
         fi
     done
 

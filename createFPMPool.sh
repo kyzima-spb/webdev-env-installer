@@ -32,14 +32,10 @@ echo "[$POOL_NAME]
     slowlog = /var/log/php-fpm/\$pool_slow.log
     request_slowlog_timeout = 5s
 
-    env[TMP]    = /tmp/php-fpm/\$pool
-    env[TMPDIR] = /tmp/php-fpm/\$pool
-    env[TEMP]   = /tmp/php-fpm/\$pool
-
     php_admin_value[error_log]         = /var/log/php-fpm/\$pool_error.log
     php_admin_value[memory_limit]      = 256M
-    php_admin_value[upload_tmp_dir]    = /tmp/php-fpm/\$pool
-    php_admin_value[session.save_path] = /tmp/php-fpm/\$pool
+    php_admin_value[upload_tmp_dir]    = /tmp
+    php_admin_value[session.save_path] = /tmp
 
     php_admin_flag[log_errors]     = off
     php_admin_flag[display_errors] = on"
