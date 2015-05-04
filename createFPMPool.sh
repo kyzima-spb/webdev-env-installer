@@ -4,7 +4,7 @@
 POOL_NAME=${1:-''}
 
 
-if [ "$POOL_NAME" == "" ]; then
+if [ "$POOL_NAME" = "" ]; then
     echo "Not passed pool name!" >&2
     exit 1
 fi
@@ -41,7 +41,7 @@ echo "[$POOL_NAME]
     php_admin_value[upload_tmp_dir]    = /tmp/php-fpm/\$pool
     php_admin_value[session.save_path] = /tmp/php-fpm/\$pool
 
-    php_admin_flag[log_errors]     = on
-    php_admin_flag[display_errors] = off"
+    php_admin_flag[log_errors]     = off
+    php_admin_flag[display_errors] = on"
 
 exit 0
