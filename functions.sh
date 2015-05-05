@@ -225,6 +225,16 @@ setupDNS()
 
 
 ##
+# Установка и настройка сервера баз данных MySQL
+##
+setupMySQL()
+{
+    apt-get install -y mysql-server
+    fixMysqlCharset
+}
+
+
+##
 # Установка и настройка веб сервера NGINX
 ##
 setupNginx()
@@ -278,16 +288,6 @@ setupNginx()
 
 
 ##
-# Установка и настройка сервера баз данных MySQL
-##
-setupMySQL()
-{
-    apt-get install -y mysql-server
-    fixMysqlCharset
-}
-
-
-##
 # Установка и настройка интерпретатора NodeJS
 ##
 setupNodeJS()
@@ -306,6 +306,8 @@ setupPHP()
 {
     local scriptPath=$(dirname "$0")
     local installationPath=${1:-"/etc/php5"}
+    local F
+    
 
     if ! commandExists "php"; then
         distInfo
@@ -327,12 +329,10 @@ setupPHP()
     fi
     
 
-    for F in $(find $installationPath -type f -name php.ini); do
-        local found=$(grep -c cgi.fix_pathinfo=1 $F)
-
-        if [ $found -ne 0 ]; then
-            sed -i "s/;\(cgi\.fix_pathinfo=\)1/\10/g" $F
-        fi
+    for F in $(find $installationPath -type f -name php.ini); do        
+        local pattern='^;?\s*?(cgi\.fix_pathinfo=).*?$'
+        local replacement='cgi\.fix_pathinfo=0'
+        sed -ri "s/$pattern/$replacement/" $F
     done
 
 
@@ -343,7 +343,6 @@ setupPHP()
 
     local poolsPath=$installationPath/fpm/pool.d
     local poolName
-    local F
 
     for F in $(find $scriptPath/configs/php-fpm -type f -name *.conf); do
         poolName=$(basename "$F" .conf)
