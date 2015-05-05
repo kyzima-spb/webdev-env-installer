@@ -203,23 +203,22 @@ installSystemSoft()
 
 
 ##
-# Установка и настройка легковестного локального DNS сервера
+# Установка и настройка легковесного локального DNS сервера
 ##
 setupDNS()
 {
-    apt-get install -y dnsmasq
+    apt-get install -y resolvconf dnsmasq
 
     local configFile=${1:-'/etc/dnsmasq.conf'}
 
     if [ -f $configFile ]; then
-        local found=$(grep -c address=/loc/127.0.0.1 $configFile)        
+        local found=$(grep -c address=/loc/127.0.0.1 $configFile)
 
         if [ $found -eq 0 ]; then
             sed -i '$ a \\naddress=/loc/127.0.0.1' $configFile
             sed -i '$ a listen-address=127.0.0.1' $configFile
 
             service dnsmasq restart
-            service networking restart
         fi
     fi
 }
@@ -295,7 +294,7 @@ setupNodeJS()
 {
     if ! commandExists "nodejs"; then
         apt-get install -y nodejs npm
-        ln -s /usr/bin/nodejs /usr/bin/node
+        ln -s /usr/bin/nodejs /usr/bin/node # todo: проверить в Ubuntu
     fi
 }
 
