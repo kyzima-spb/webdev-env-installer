@@ -329,9 +329,16 @@ setupPHP()
     fi
     
 
-    for F in $(find $installationPath -type f -name php.ini); do        
-        local pattern='^;?\s*?(cgi\.fix_pathinfo=).*?$'
-        local replacement='cgi\.fix_pathinfo=0'
+    for F in $(find $installationPath -type f -name php.ini); do
+        local pattern
+        local replacement
+
+        pattern='^;?\s*?cgi\.fix_pathinfo\s*?=.*?$'
+        replacement='cgi.fix_pathinfo = 0'
+        sed -ri "s/$pattern/$replacement/" $F
+
+        pattern='^;?\s*?date\.timezone\s*?=.*?$'
+        replacement='date.timezone = "Europe\/Moscow"'
         sed -ri "s/$pattern/$replacement/" $F
     done
 
