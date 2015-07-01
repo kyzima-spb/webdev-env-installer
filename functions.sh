@@ -128,6 +128,15 @@ fixMysqlCharset()
 
 
 ##
+# Получить HTTP код ответа сервера
+##
+getHttpStatusCode()
+{
+    curl --write-out %{http_code} --silent --output /dev/null $1
+}
+
+
+##
 # Инициализирует рабочее окружение пользователя
 ##
 initUser()
@@ -248,7 +257,7 @@ setupNginx()
         distInfo
 
         case $CODENAME in
-            testing | sid )
+            stretch | testing | sid )
                 local nginxCodename="jessie"
                 ;;
             *)
@@ -256,11 +265,15 @@ setupNginx()
                 ;;
         esac
 
-        echo deb http://nginx.org/packages/mainline/${DISTR_ID,,}/ $nginxCodename nginx >> $sourceList
-        echo deb-src http://nginx.org/packages/mainline/${DISTR_ID,,}/ $nginxCodename nginx >> $sourceList
+        local url=http://nginx.org/packages/mainline/${DISTR_ID,,}
 
-        wget -O - http://nginx.org/keys/nginx_signing.key | apt-key add -
-        apt-get update
+        if [ "$(getHttpStatusCode $url/dists/$nginxCodename)" != '404' ]; then
+            echo deb $url/ $nginxCodename nginx >> $sourceList
+            echo deb-src $url/ $nginxCodename nginx >> $sourceList
+
+            wget -O - http://nginx.org/keys/nginx_signing.key | apt-key add -
+            apt-get update
+        fi
     fi
 
 
