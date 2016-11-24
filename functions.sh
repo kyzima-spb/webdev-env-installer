@@ -169,6 +169,11 @@ initUser()
         service php5-fpm restart
     fi
 
+    if [ $http_proxy ]; then
+        git config --global http.proxy $http_proxy
+    else
+        git config --global --unset http.proxy
+    fi
 
     return 0
 }
