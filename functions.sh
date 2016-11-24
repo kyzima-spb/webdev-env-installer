@@ -212,7 +212,7 @@ installLocalSoft()
 ##
 installSystemSoft()
 {
-    apt-get install -y vim curl flashplugin-nonfree arandr
+    apt-get install vim curl flashplugin-nonfree arandr
 }
 
 
