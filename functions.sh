@@ -34,6 +34,23 @@ commandExists()
 
 
 ##
+# Возвращает 1, если элемент есть в списке или 0 - если нет.
+##
+in_list()
+{
+    local i
+
+    for i in $1; do
+        if [ $i = $2 ]; then
+            return 1
+        fi
+    done
+
+    return 0
+}
+
+
+##
 # Информация о дистрибутиве
 ##
 distInfo()
@@ -53,6 +70,10 @@ distInfo()
             betsy )
                 DISTR_ID="Debian"
                 CODENAME="jessie"
+                ;;
+            sarah)
+                DISTR_ID="Ubuntu"
+                CODENAME="xenial"
                 ;;
             rebecca | qiana)
                 DISTR_ID="Ubuntu"
