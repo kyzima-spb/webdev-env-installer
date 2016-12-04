@@ -233,7 +233,7 @@ installLocalSoft()
 ##
 installSystemSoft()
 {
-    apt-get install vim curl flashplugin-nonfree arandr
+    apt-get install vim curl flashplugin-nonfree arandr zsh
 }
 
 
@@ -266,18 +266,6 @@ setupMySQL()
 {
     apt-get install -y mysql-server
     fixMysqlCharset
-}
-
-
-##
-# Установка и настройка интерпретатора NodeJS
-##
-setupNodeJS()
-{
-    if ! commandExists "nodejs"; then
-        apt-get install -y nodejs npm
-        ln -s /usr/bin/nodejs /usr/bin/node # todo: проверить в Ubuntu
-    fi
 }
 
 

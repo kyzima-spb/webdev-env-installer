@@ -8,6 +8,7 @@ APT_SOURCE_DIR="/etc/apt/sources.list.d/"
 . "$SCRIPT_PATH/functions.sh"
 . "$SCRIPT_PATH/scripts/nginx.sh"
 . "$SCRIPT_PATH/scripts/php.sh"
+. "$SCRIPT_PATH/scripts/nodejs.sh"
 
 
 installMenuHandler()
@@ -23,7 +24,7 @@ installMenuHandler()
             #php5) setupPHP;;
             php7) php_install;;
             mysql-server) setupMySQL;;
-            nodejs) setupNodeJS;;
+            nodejs) nodejs_install;;
             dnsmasq) setupDNS;;
             tools) installDevelopementTools;;
             soft) installLocalSoft;;
