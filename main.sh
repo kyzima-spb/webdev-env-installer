@@ -6,9 +6,8 @@ APT_SOURCE_DIR="/etc/apt/sources.list.d/"
 
 
 . "$SCRIPT_PATH/functions.sh"
-. "$SCRIPT_PATH/php7.sh"
-
 . "$SCRIPT_PATH/scripts/nginx.sh"
+. "$SCRIPT_PATH/scripts/php.sh"
 
 
 installMenuHandler()
@@ -21,8 +20,8 @@ installMenuHandler()
         case "$task" in
             system-tools) installSystemSoft;;
             nginx) nginx_install;;
-            php5) setupPHP;;
-            php7) installPHP7;;
+            #php5) setupPHP;;
+            php7) php_install;;
             mysql-server) setupMySQL;;
             nodejs) setupNodeJS;;
             dnsmasq) setupDNS;;
@@ -40,7 +39,6 @@ installMenu()
         "Select what you want to install" 20 75 13 \
             system-tools "Install necessary software like Flash, Vim and etc." 0 \
             nginx        "Install and configure the web server Nginx" 0 \
-            php5         "Install and configure the PHP interpreter" 0 \
             php7         "Install and configure the PHP7.0 interpreter" 0 \
             mysql-server "Install and configure the MySQL database server" 0 \
             nodejs       "Install and configure the NodeJS interpreter" 0 \
