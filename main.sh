@@ -8,6 +8,8 @@ APT_SOURCE_DIR="/etc/apt/sources.list.d/"
 . "$SCRIPT_PATH/functions.sh"
 . "$SCRIPT_PATH/php7.sh"
 
+. "$SCRIPT_PATH/scripts/nginx.sh"
+
 
 installMenuHandler()
 {
@@ -18,7 +20,7 @@ installMenuHandler()
     for task in $1; do
         case "$task" in
             system-tools) installSystemSoft;;
-            nginx) setupNginx;;
+            nginx) nginx_install;;
             php5) setupPHP;;
             php7) installPHP7;;
             mysql-server) setupMySQL;;

@@ -270,63 +270,6 @@ setupMySQL()
 
 
 ##
-# Установка и настройка веб сервера NGINX
-##
-setupNginx()
-{
-    local scriptPath=$(dirname "$0")
-    local installationPath=${1:-"/etc/nginx"}
-    local sourceList=${APT_SOURCE_DIR}nginx-mainline.list
-
-
-    if ! [ -f $sourceList ]; then
-        distInfo
-
-        case $CODENAME in
-            stretch | testing | sid )
-                local nginxCodename="jessie"
-                ;;
-            *)
-                local nginxCodename=$CODENAME
-                ;;
-        esac
-
-        local url=http://nginx.org/packages/mainline/${DISTR_ID,,}
-
-        if [ "$(getHttpStatusCode $url/dists/$nginxCodename)" != '404' ]; then
-            echo deb $url/ $nginxCodename nginx >> $sourceList
-            echo deb-src $url/ $nginxCodename nginx >> $sourceList
-
-            wget -O - http://nginx.org/keys/nginx_signing.key | apt-key add -
-            apt-get update
-        fi
-    fi
-
-
-    if ! commandExists "nginx"; then
-        apt-get install -y nginx
-        cp $scriptPath/configs/nginx.conf $installationPath
-    fi
-
-
-    if [ ! -d $installationPath/sites-available ]; then
-        mkdir -p /etc/nginx/sites-available
-    fi
-
-    if [ ! -d $installationPath/sites-enabled ]; then
-        mkdir -p /etc/nginx/sites-available $installationPath/sites-enabled
-    fi
-
-
-    if [ ! -f $installationPath/sites-available/dev-zone-loc.conf ]; then
-        cp $scriptPath/configs/nginx-dev-zone.conf $installationPath/sites-available/dev-zone-loc.conf
-        ln -s $installationPath/sites-available/dev-zone-loc.conf $installationPath/sites-enabled/
-        service nginx restart
-    fi
-}
-
-
-##
 # Установка и настройка интерпретатора NodeJS
 ##
 setupNodeJS()
