@@ -42,6 +42,37 @@ php_update_source_list()
     fi
 }
 
+
+##
+# Возвращает название команды для запуска PHP.
+##
+php_get_cmd()
+{
+    local version=${1:-"7"}
+    echo $(compgen -c | egrep ^php$version[\.0-9]*$)
+}
+
+
+##
+# Возвращает путь к директории, где установлен PHP.
+# Принимает один не обязательный аргумент version: 5 или 7.
+# По-умолчанию ищет версию 7.
+##
+php_get_installation_path()
+{
+    local version=${1:-"7"}
+    local cmd=$(php_get_cmd $version)
+
+    if [ "$cmd" == "" ]; then
+        return
+    fi
+
+    local installationPath=$($cmd --ini | grep "Configuration File (php.ini) Path:" | rev | cut -f1 -d \ | rev)
+    
+    echo $(dirname "$installationPath")
+}
+
+
 php_install()
 {
     if ! commandExists "php"; then
@@ -61,8 +92,7 @@ php_install()
 
     local scriptPath=$(dirname "$0")
     local F
-    local installationPath=$(php --ini | grep "Configuration File (php.ini) Path:" | rev | cut -f1 -d \ | rev)
-    installationPath=$(dirname "$installationPath")
+    local installationPath=$(php_get_installation_path "7")
 
     for F in $(find $installationPath -type f -name php.ini); do
         local pattern
@@ -98,6 +128,48 @@ php_install()
     if [ ! -f /usr/local/bin/composer ]; then
         curl -sS https://getcomposer.org/installer | php
         mv composer.phar /usr/local/bin/composer
+    fi
+}
+
+
+php_create_pool()
+{
+    if [ $# -lt 2 ]; then
+        return
+    fi
+
+    local version=$1
+    local user=$2
+
+    if [ "$version" != "5" ] && [ "$version" != "7" ] ; then
+        return
+    fi
+
+    local scriptPath=$(dirname "$0")
+    local installationPath=$(php_get_installation_path $version)
+
+    if [ "$installationPath" == "" ]; then
+        return
+    fi
+
+    local cmd=$(php_get_cmd $version)
+    cmd="$cmd-fpm"
+
+    if [ -d "$installationPath/fpm" ]; then
+        if [ ! -f "$installationPath/fpm/pool.d/$username.conf" ]; then
+            $scriptPath/createFPMPool.sh $user > $installationPath/fpm/pool.d/$user.conf
+        fi
+
+        if [ ! -f "/tmp/$cmd/$user" ]; then
+            mkdir -p /tmp/$cmd/$user
+            chown $user:$user /tmp/$cmd/$user
+        fi
+
+        if [ ! -f "/var/log/php-fpm" ]; then
+            mkdir -p "/var/log/php-fpm"
+        fi
+
+        service "$cmd" restart
     fi
 }
 
