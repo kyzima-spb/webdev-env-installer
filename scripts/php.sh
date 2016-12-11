@@ -157,16 +157,7 @@ php_create_pool()
 
     if [ -d "$installationPath/fpm" ]; then
         if [ ! -f "$installationPath/fpm/pool.d/$username.conf" ]; then
-            $scriptPath/createFPMPool.sh $user > $installationPath/fpm/pool.d/$user.conf
-        fi
-
-        if [ ! -f "/tmp/$cmd/$user" ]; then
-            mkdir -p /tmp/$cmd/$user
-            chown $user:$user /tmp/$cmd/$user
-        fi
-
-        if [ ! -f "/var/log/php-fpm" ]; then
-            mkdir -p "/var/log/php-fpm"
+            $scriptPath/createFPMPool.sh -n $user -v $version > $installationPath/fpm/pool.d/$user.conf
         fi
 
         service "$cmd" restart

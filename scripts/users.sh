@@ -1,13 +1,45 @@
 ##
+# Добавляет пользователей в систему и инициализирует рабочее окружение
+##
+user_create()
+{
+    while [ 1 ]; do
+        if ! asksure "You want to create a new user?"; then
+            break
+        fi
+
+        local username
+        read -r -p "Enter username: " username
+
+        adduser $username
+        user_init_env $username
+    done
+}
+
+
+##
+# Возвращает 0, если пользователь существует, или 1 - если не существует.
+##
+user_exists()
+{
+    if [ "$(grep -i "^$1:" /etc/passwd)" = "" ]; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+
+##
 # Инициализирует рабочее окружение пользователя
 ##
-initUser()
+user_init_env()
 {
     local scriptPath=$(dirname "$0")
     local username=${1:-""}
 
 
-    if ! userExists $username; then
+    if ! user_exists $username; then
         return 1
     fi
 
@@ -17,19 +49,15 @@ initUser()
         chown -R $username:$username /home/$username/www
     fi
 
+    local pv
 
-    if commandExists "php5-fpm"; then
-        if [ ! -f /etc/php5/fpm/pool.d/$username.conf ]; then
-            $scriptPath/createFPMPool.sh $username > /etc/php5/fpm/pool.d/$username.conf
+    for pv in 5 7; do
+        local php_cmd=$(php_get_cmd $pv)
+
+        if [ "php_cmd" != "" ]; then
+            php_create_pool $pv $username
         fi
-
-        if [ ! -f "/tmp/php-fpm/$username" ]; then
-            mkdir -p /tmp/php-fpm/$username
-            chown $username:$username /tmp/php-fpm/$username
-        fi
-
-        service php5-fpm restart
-    fi
+    done
 
     if [ $http_proxy ]; then
         git config --global http.proxy $http_proxy
@@ -38,4 +66,22 @@ initUser()
     fi
 
     return 0
+}
+
+
+##
+# Инициализирует окружение для существующих пользователей системы
+##
+user_update_env()
+{
+    while [ 1 ]; do
+        if ! asksure "Do you want to initialize the user's work environment?"; then
+            break
+        fi
+
+        local username
+        read -r -p "Enter username: " username
+
+        user_init_env $username
+    done
 }

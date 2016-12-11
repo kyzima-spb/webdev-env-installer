@@ -72,8 +72,8 @@ mainMenu()
     case "$answer" in
         1) installMenu;;
         2) fixMysqlCharset;;
-        3) addUsers;;
-        4) updateUsers;;
+        3) user_create;;
+        4) user_update_env;;
         x) exitstatus=1;;
     esac
 

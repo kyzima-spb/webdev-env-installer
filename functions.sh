@@ -104,40 +104,6 @@ distInfo()
 
 
 ##
-# Возвращает 0, если пользователь существует, или 1 - если не существует.
-##
-userExists()
-{
-    if [ "$(grep -i "^$1:" /etc/passwd)" = "" ]; then
-        return 1
-    else
-        return 0
-    fi
-}
-
-
-
-
-##
-# Добавляет пользователей в систему и инициализирует рабочее окружение
-##
-addUsers()
-{
-    while [ 1 ]; do
-        if ! asksure "You want to create a new user?"; then
-            break
-        fi
-
-        local username
-        read -r -p "Enter username: " username
-
-        adduser $username
-        initUser $username
-    done
-}
-
-
-##
 # Изменить кодировку MySQL на UTF-8 по-умолчанию
 ##
 fixMysqlCharset()
@@ -223,22 +189,4 @@ setupMySQL()
 {
     apt-get install -y mysql-server
     fixMysqlCharset
-}
-
-
-##
-# Инициализирует окружение для существующих пользователей системы
-##
-updateUsers()
-{
-    while [ 1 ]; do
-        if ! asksure "Do you want to initialize the user's work environment?"; then
-            break
-        fi
-
-        local username
-        read -r -p "Enter username: " username
-
-        initUser $username
-    done
 }
