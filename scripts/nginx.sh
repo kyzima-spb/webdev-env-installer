@@ -55,8 +55,14 @@ nginx_install()
 
 
     if [ ! -f $installationPath/sites-available/dev-zone-loc.conf ]; then
-        cp $scriptPath/configs/nginx-dev-zone.conf $installationPath/sites-available/dev-zone-loc.conf
+        sed -e "s/{{ domain }}/loc/" -e "s/{{ php_version }}/7/" $scriptPath/configs/nginx-dev-zone.conf > $installationPath/sites-available/dev-zone-loc.conf
         ln -s $installationPath/sites-available/dev-zone-loc.conf $installationPath/sites-enabled/
+        service nginx restart
+    fi
+
+    if [ ! -f $installationPath/sites-available/dev-zone-loc5.conf ]; then
+        sed -e "s/{{ domain }}/loc5/" -e "s/{{ php_version }}/5/" $scriptPath/configs/nginx-dev-zone.conf > $installationPath/sites-available/dev-zone-loc5.conf
+        ln -s $installationPath/sites-available/dev-zone-loc5.conf $installationPath/sites-enabled/
         service nginx restart
     fi
 }

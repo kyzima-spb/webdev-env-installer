@@ -174,6 +174,7 @@ setupDNS()
 
         if [ $found -eq 0 ]; then
             sed -i '$ a \\naddress=/loc/127.0.0.1' $configFile
+            sed -i '$ a \\naddress=/loc5/127.0.0.1' $configFile
             sed -i '$ a listen-address=127.0.0.1' $configFile
 
             service dnsmasq restart
