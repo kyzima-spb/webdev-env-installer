@@ -104,6 +104,31 @@ distInfo()
 
 
 ##
+# Возвращает или создает новый файл по указанному шаблону с переданными данными
+# Данные передаются как описание ассоциативного массива
+# Аргументы: <шаблон> <данные> [<выходной_файл>]
+##
+render()
+{
+    local template=${1:-""}
+    eval "declare -A context="${2#*=}
+    local out=${3:-""}
+    local key
+    local args=""
+
+    for key in "${!context[@]}"; do
+        args+="-e \"s/{{ $key }}/${context[$key]}/\" "
+    done
+
+    if [ "$out" == "" ]; then
+        eval "sed $args \"$template\""
+    else
+        eval "sed $args \"$template\" > \"$out\""
+    fi
+}
+
+
+##
 # Изменить кодировку MySQL на UTF-8 по-умолчанию
 ##
 fixMysqlCharset()
