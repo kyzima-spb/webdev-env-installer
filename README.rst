@@ -21,3 +21,13 @@ Tested and works
 .. image:: https://img.shields.io/badge/LMDE-2.*-green.svg
    :target: https://www.linuxmint.com/download_lmde.php
    :alt: Linux Mint - elegant and comfortable operating system
+
+===============
+Install and Run
+===============
+
+.. code:: shell
+
+  git clone https://github.com/kyzima-spb/webdev-env-installer.git
+  cd webdev-env-installer
+  sudo ./main.sh
