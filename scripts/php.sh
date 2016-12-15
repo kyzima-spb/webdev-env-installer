@@ -73,9 +73,14 @@ php_get_installation_path()
 }
 
 
+##
+# Устанавливает PHP7
+##
 php_install()
 {
-    if ! commandExists "php"; then
+    local cmd=$(php_get_cmd "7")
+
+    if [ "$cmd" == "" ]; then
         php_update_source_list
 
         apt-get install -y php7.0-common php7.0-cli php7.0-fpm php7.0-readline \
@@ -87,12 +92,65 @@ php_install()
                            php7.0-mcrypt \
                            php7.0-mysql php7.0-pgsql php7.0-sqlite3 \
                            php7.0-tidy php7.0-xsl
+    
+        php_fix_config_files "7"
+        php_composer_install
     fi
+}
 
 
+##
+# Устанавливает PHP5
+##
+php_5_install()
+{
+    local cmd=$(php_get_cmd "5")
+
+    if [ "$cmd" == "" ]; then
+        php_update_source_list
+
+        apt-get install -y php5-common php5-cli php5-fpm php5-readline \
+                           php5-xdebug php5-phpdbg \
+                           php5-curl \
+                           php5-intl \
+                           php5-gmp \
+                           php5-json \
+                           php5-mcrypt \
+                           php5-mysql php5-pgsql php5-sqlite php5-mongo \
+                           php5-tidy php5-xsl
+        
+        php_fix_config_files "5"
+        php_composer_install
+    fi
+}
+
+
+##
+# Устанавливает Composer
+##
+php_composer_install()
+{
+    if [ ! -f /usr/local/bin/composer ]; then
+        curl -sS https://getcomposer.org/installer | php
+        mv composer.phar /usr/local/bin/composer
+    fi
+}
+
+
+##
+# Исправляет все конфигурационные php-файлы для указанной версии
+##
+php_fix_config_files()
+{
+    local version=${1:-""}
+
+    while [ "$version" != "5" ] && [ "$version" != "7" ]; do
+        read -r -p "Enter PHP version [5,7]: " version
+    done
+        
     local scriptPath=$(dirname "$0")
     local F
-    local installationPath=$(php_get_installation_path "7")
+    local installationPath=$(php_get_installation_path "$version")
 
     for F in $(find $installationPath -type f -name php.ini); do
         local pattern
@@ -123,12 +181,6 @@ php_install()
             cp $F $poolsPath
         fi
     done
-
-
-    if [ ! -f /usr/local/bin/composer ]; then
-        curl -sS https://getcomposer.org/installer | php
-        mv composer.phar /usr/local/bin/composer
-    fi
 }
 
 
@@ -161,75 +213,5 @@ php_create_pool()
         fi
 
         service "$cmd" restart
-    fi
-}
-
-
-
-
-
-
-
-setupPHP()
-{
-    local scriptPath=$(dirname "$0")
-    local installationPath=${1:-"/etc/php5"}
-    local F
-    
-
-    if ! commandExists "php"; then
-        distInfo
-
-        if [ $DISTR_ID = "Ubuntu" ]; then
-            add-apt-repository ppa:ondrej/php5-5.6 -y
-            apt-get update
-        fi
-        
-        apt-get install -y php5-common php5-cli php5-fpm php5-readline \
-                            php5-xdebug php5-phpdbg \
-                            php5-curl \
-                            php5-intl \
-                            php5-gmp \
-                            php5-json \
-                            php5-mcrypt \
-                            php5-mysql php5-pgsql php5-sqlite php5-mongo \
-                            php5-tidy php5-xsl
-    fi
-    
-
-    for F in $(find $installationPath -type f -name php.ini); do
-        local pattern
-        local replacement
-
-        pattern='^;?\s*?cgi\.fix_pathinfo\s*?=.*?$'
-        replacement='cgi.fix_pathinfo = 0'
-        sed -ri "s/$pattern/$replacement/" $F
-
-        pattern='^;?\s*?date\.timezone\s*?=.*?$'
-        replacement='date.timezone = "Europe\/Moscow"'
-        sed -ri "s/$pattern/$replacement/" $F
-    done
-
-
-    if [ ! -f "/var/log/php-fpm" ]; then
-        mkdir -p /var/log/php-fpm
-    fi
-
-
-    local poolsPath=$installationPath/fpm/pool.d
-    local poolName
-
-    for F in $(find $scriptPath/configs/php-fpm -type f -name *.conf); do
-        poolName=$(basename "$F" .conf)
-
-        if [ ! -f "$poolsPath/$poolName.conf" ]; then
-            cp $F $poolsPath
-        fi
-    done
-
-
-    if [ ! -f /usr/local/bin/composer ]; then
-        curl -sS https://getcomposer.org/installer | php
-        mv composer.phar /usr/local/bin/composer
     fi
 }
