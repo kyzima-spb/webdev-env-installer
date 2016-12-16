@@ -154,7 +154,7 @@ php_fix_config_files()
 
     declare -A context=(
         ["name"]="prod"
-        ["listen"]="/var/run/php${version}-fpm_\$pool.sock"
+        ["version"]=$version
         ["log_errors"]="on"
         ["display_errors"]="off"
     )
@@ -162,23 +162,11 @@ php_fix_config_files()
 
     declare -A context=(
         ["name"]="dev"
-        ["listen"]="/var/run/php${version}-fpm_\$pool.sock"
+        ["version"]=$version
         ["log_errors"]="off"
         ["display_errors"]="on"
     )
     render "$scriptPath/configs/php-fpm-pool.conf" "$(declare -p context)" "$pools_path/dev.conf"
-
-
-    
-    # local poolName
-
-    # for F in $(find $scriptPath/configs/php-fpm -type f -name *.conf); do
-    #     poolName=$(basename "$F" .conf)
-
-    #     if [ ! -f "$poolsPath/$poolName.conf" ]; then
-    #         cp $F $poolsPath
-    #     fi
-    # done
 }
 
 
