@@ -150,17 +150,35 @@ php_fix_config_files()
         mkdir -p /var/log/php-fpm
     fi
 
+    local pools_path=$installationPath/fpm/pool.d
 
-    local poolsPath=$installationPath/fpm/pool.d
-    local poolName
+    declare -A context=(
+        ["name"]="prod"
+        ["listen"]="/var/run/php${version}-fpm_\$pool.sock"
+        ["log_errors"]="on"
+        ["display_errors"]="off"
+    )
+    render "$scriptPath/configs/php-fpm-pool.conf" "$(declare -p context)" "$pools_path/prod.conf"
 
-    for F in $(find $scriptPath/configs/php-fpm -type f -name *.conf); do
-        poolName=$(basename "$F" .conf)
+    declare -A context=(
+        ["name"]="dev"
+        ["listen"]="/var/run/php${version}-fpm_\$pool.sock"
+        ["log_errors"]="off"
+        ["display_errors"]="on"
+    )
+    render "$scriptPath/configs/php-fpm-pool.conf" "$(declare -p context)" "$pools_path/dev.conf"
 
-        if [ ! -f "$poolsPath/$poolName.conf" ]; then
-            cp $F $poolsPath
-        fi
-    done
+
+    
+    # local poolName
+
+    # for F in $(find $scriptPath/configs/php-fpm -type f -name *.conf); do
+    #     poolName=$(basename "$F" .conf)
+
+    #     if [ ! -f "$poolsPath/$poolName.conf" ]; then
+    #         cp $F $poolsPath
+    #     fi
+    # done
 }
 
 
