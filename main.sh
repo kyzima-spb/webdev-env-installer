@@ -41,6 +41,7 @@ installMenu()
         "Select what you want to install" 20 75 13 \
             system-tools "Install necessary software like Flash, Vim and etc." 0 \
             nginx        "Install and configure the web server Nginx" 0 \
+            php5         "Install and configure the PHP5 interpreter" 0 \
             php7         "Install and configure the PHP7.0 interpreter" 0 \
             mysql-server "Install and configure the MySQL database server" 0 \
             nodejs       "Install and configure the NodeJS interpreter" 0 \
