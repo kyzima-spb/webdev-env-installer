@@ -80,19 +80,9 @@ php_install()
 {
     local cmd=$(php_get_cmd "7")
 
-    if [ "$cmd" == "" ]; then
+    if [[ -z $cmd ]]; then
         php_update_source_list
-
-        apt-get install -y php7.0-common php7.0-cli php7.0-fpm php7.0-readline \
-                           php7.0-phpdbg \
-                           php7.0-curl \
-                           php7.0-intl \
-                           php7.0-gmp \
-                           php7.0-json \
-                           php7.0-mcrypt \
-                           php7.0-mysql php7.0-pgsql php7.0-sqlite3 \
-                           php7.0-tidy php7.0-xsl
-    
+        php_find_and_install "7.0"
         php_fix_config_files "7"
         php_composer_install
     fi
@@ -108,17 +98,7 @@ php_5_install()
 
     if [ "$cmd" == "" ]; then
         php_update_source_list
-
-        apt-get install -y php5-common php5-cli php5-fpm php5-readline \
-                           php5-xdebug php5-phpdbg \
-                           php5-curl \
-                           php5-intl \
-                           php5-gmp \
-                           php5-json \
-                           php5-mcrypt \
-                           php5-mysql php5-pgsql php5-sqlite php5-mongo \
-                           php5-tidy php5-xsl
-        
+        php_find_and_install "5 5.6 5.5 5.4"
         php_fix_config_files "5"
         php_composer_install
     fi
@@ -214,4 +194,30 @@ php_create_pool()
 
         service "$cmd" restart
     fi
+}
+
+
+##
+# Выполняет поиск указанной версии PHP в репозитории и выполняет устанавку
+##
+php_find_and_install()
+{
+    local version
+    local result
+    local pkg
+    local cmd="apt-get install -y"
+
+    for version in $1; do
+        result=$(apt-cache search php${version} | egrep ^php${version})
+
+        if [[ ! -z $result ]]; then
+            for pkg in common cli fpm readline xdebug phpdbg curl intl gmp json mcrypt mysql pgsql sqlite mongo tidy xsl; do
+                cmd+=" $(echo $result | grep -o php${version}-${pkg})"
+            done
+
+            eval "$cmd"
+
+            break
+        fi
+    done
 }

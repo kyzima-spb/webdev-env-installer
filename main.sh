@@ -22,7 +22,7 @@ installMenuHandler()
         case "$task" in
             system-tools) installSystemSoft;;
             nginx) nginx_install;;
-            #php5) setupPHP;;
+            php5) php_5_install;;
             php7) php_install;;
             mysql-server) setupMySQL;;
             nodejs) nodejs_install;;
