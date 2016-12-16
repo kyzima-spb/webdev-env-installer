@@ -208,7 +208,7 @@ php_find_and_install()
     local cmd="apt-get install -y"
 
     for version in $1; do
-        result=$(apt-cache search php${version} | egrep ^php${version})
+        result=$(apt-cache search php${version} | egrep ^php${version}-)
 
         if [[ ! -z $result ]]; then
             for pkg in common cli fpm readline xdebug phpdbg curl intl gmp json mcrypt mysql pgsql sqlite mongo tidy xsl; do
