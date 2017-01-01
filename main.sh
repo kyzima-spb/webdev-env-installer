@@ -10,6 +10,7 @@ APT_SOURCE_DIR="/etc/apt/sources.list.d/"
 . "$SCRIPT_PATH/scripts/nginx.sh"
 . "$SCRIPT_PATH/scripts/php.sh"
 . "$SCRIPT_PATH/scripts/nodejs.sh"
+. "$SCRIPT_PATH/scripts/numix.sh"
 
 
 installMenuHandler()
@@ -64,6 +65,7 @@ mainMenu()
             2 "Fix MySQL character set" \
             3 "Add users" \
             4 "Update users" \
+            5 "Install Numix" \
             x "Exit" \
         3>&1 1>&2 2>&3
     )
@@ -75,6 +77,7 @@ mainMenu()
         2) fixMysqlCharset;;
         3) user_create;;
         4) user_update_env;;
+        5) numix_install;;
         x) exitstatus=1;;
     esac
 
