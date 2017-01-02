@@ -12,8 +12,6 @@ nginx_update_source_list()
     local codenames="wheezy jessie precise trusty xenial"
     local sourceList=${APT_SOURCE_DIR}nginx-mainline.list
 
-    distInfo
-
     if ! in_list $codenames $CODENAME; then
         return
     fi

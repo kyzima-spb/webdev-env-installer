@@ -51,55 +51,98 @@ in_list()
 
 
 ##
-# Информация о дистрибутиве
+# Возвращает путь к директории с конфигурацией
 ##
-distInfo()
+config_get_dir()
 {
-    if [ -n "$DISTR_ID" ] && [ -n "$CODENAME" ]; then
-        return
+    local path=~/.config/workflow
+
+    if [ ! -d $path ]; then
+        mkdir -p $path
     fi
 
-    DISTR_ID=$(lsb_release -is)
-    CODENAME=$(lsb_release -cs)
+    echo $path
+}
+
+
+##
+# Возвращает информацию о дистрибутиве
+##
+distr_get_info()
+{
+    # lsb_release
+
+    local d_id=$(lsb_release -is)
+    local codename=$(lsb_release -cs)
     local note=""
 
-    if [ "$DISTR_ID" = "LinuxMint" ]; then
-        note=" (LinuxMint)"
+    if [ "$d_id" = "LinuxMint" ]; then
+        note="LinuxMint"
 
-        case $CODENAME in
+        case $codename in
             betsy )
-                DISTR_ID="Debian"
-                CODENAME="jessie"
+                d_id="Debian"
+                codename="jessie"
                 ;;
             sarah)
-                DISTR_ID="Ubuntu"
-                CODENAME="xenial"
+                d_id="Ubuntu"
+                codename="xenial"
                 ;;
             rebecca | qiana)
-                DISTR_ID="Ubuntu"
-                CODENAME="trusty"
+                d_id="Ubuntu"
+                codename="trusty"
                 ;;
             maya)
-                DISTR_ID="Ubuntu"
-                CODENAME="precise"
+                d_id="Ubuntu"
+                codename="precise"
                 ;;
         esac
     fi
 
+    echo "$d_id $codename $note"
+}
+
+
+##
+# Инициализирует информацию о дистрибутиве
+##
+distr_read_info()
+{
+    local d_id
+    local codename
+    local note
+    local filename="$(config_get_dir)/distr.conf"
+
+    if [ -n "$DISTR_ID" ] && [ -n "$CODENAME" ]; then
+        return
+    fi
+
+    read d_id codename note <<< $(distr_get_info)
+
+    if [ -f $filename ]; then
+        . $filename
+    fi
+
+    if [ "$DISTR_ID" = "$d_id" ] && [ "$CODENAME" = "$codename" ]; then
+        return
+    fi
+
     while [ 1 ]; do
-        echo -e "The distributor's ID: $DISTR_ID$note"
-        echo -e "The code name of the currently installed distribution: $CODENAME$note\n"
+        echo -e "The distributor's ID: $d_id ($note)"
+        echo -e "The code name of the currently installed distribution: $codename ($note)\n"
 
         if asksure "Is this ok?"; then
             break
         fi
 
-        read -r -p "Enter the distributor's ID: " -e -i $DISTR_ID
-        DISTR_ID=$REPLY
-
-        read -r -p "Enter the code name of the currently installed distribution: " -e -i $CODENAME
-        CODENAME=$REPLY
+        read -r -e -p "Enter the distributor's ID: " d_id
+        read -r -e -p "Enter the code name of the currently installed distribution: " codename
     done
+
+    DISTR_ID=$d_id
+    CODENAME=$codename
+
+    printf "DISTR_ID=${DISTR_ID}\nCODENAME=${CODENAME}" > $filename
 }
 
 

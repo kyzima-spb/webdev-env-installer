@@ -92,7 +92,7 @@ main()
         exit 1;
     fi
 
-    distInfo
+    distr_read_info
 
     while [ "$?" = 0 ]; do
         mainMenu
