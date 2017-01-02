@@ -172,17 +172,6 @@ render()
 
 
 ##
-# Изменить кодировку MySQL на UTF-8 по-умолчанию
-##
-fixMysqlCharset()
-{
-    if $(dirname "$0")/fixMysqlCharset.sh; then
-        service mysql restart
-    fi
-}
-
-
-##
 # Получить HTTP код ответа сервера
 ##
 getHttpStatusCode()
@@ -248,14 +237,4 @@ setupDNS()
             service dnsmasq restart
         fi
     fi
-}
-
-
-##
-# Установка и настройка сервера баз данных MySQL
-##
-setupMySQL()
-{
-    apt-get install -y mysql-server
-    fixMysqlCharset
 }

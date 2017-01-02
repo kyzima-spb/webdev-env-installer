@@ -11,6 +11,7 @@ APT_SOURCE_DIR="/etc/apt/sources.list.d/"
 . "$SCRIPT_PATH/scripts/php.sh"
 . "$SCRIPT_PATH/scripts/nodejs.sh"
 . "$SCRIPT_PATH/scripts/numix.sh"
+. "$SCRIPT_PATH/scripts/databases.sh"
 
 
 installMenuHandler()
@@ -25,7 +26,7 @@ installMenuHandler()
             nginx) nginx_install;;
             php5) php_5_install;;
             php7) php_install;;
-            mysql-server) setupMySQL;;
+            mysql-server) mysql_install;;
             nodejs) nodejs_install;;
             dnsmasq) setupDNS;;
             tools) installDevelopementTools;;
@@ -74,7 +75,7 @@ mainMenu()
 
     case "$answer" in
         1) installMenu;;
-        2) fixMysqlCharset;;
+        2) mysql_fix_charset;;
         3) user_create;;
         4) user_update_env;;
         5) numix_install;;
