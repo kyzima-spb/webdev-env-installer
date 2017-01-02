@@ -3,7 +3,7 @@
 ##
 mysql_fix_charset()
 {
-    if $(dirname "$0")/fixMysqlCharset.sh; then
+    if $(dirname "$0")/bin/mysqlFixCharset.sh; then
         service mysql restart
     fi
 }
