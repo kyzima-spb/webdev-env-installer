@@ -51,11 +51,15 @@ user_init_env()
 
     local pv
 
-    for pv in 5 7; do
+    for pv in 2 5 7; do
         local php_cmd=$(php_get_cmd $pv)
 
-        if [ "php_cmd" != "" ]; then
-            php_create_pool $pv $username
+        if [[ ! -z $php_cmd ]]; then
+            declare -A context=(
+                ["log_errors"]="off"
+                ["display_errors"]="on"
+            )
+            php_create_pool "$username" "$pv" "$username" "$(declare -p context)"
         fi
     done
 

@@ -54,6 +54,26 @@ php_get_cmd()
 
 
 ##
+# Возвращает название PHP-FPM сервиса.
+##
+php_get_service_name()
+{
+    local cmd=$(php_get_cmd "$1")
+    local service_name
+
+    if [[ -z $cmd ]]; then
+        return
+    fi
+
+    service_name="$cmd-fpm"
+        
+    if service_exists $service_name; then
+        echo $service_name
+    fi
+}
+
+
+##
 # Возвращает путь к директории, где установлен PHP.
 # Принимает один не обязательный аргумент version: 5 или 7.
 # По-умолчанию ищет версию 7.
@@ -145,61 +165,95 @@ php_fix_config_files()
         sed -ri "s/$pattern/$replacement/" $F
     done
 
-    
-    if [ ! -f "/var/log/php-fpm" ]; then
-        mkdir -p /var/log/php-fpm
-    fi
-
-    local pools_path=$installationPath/fpm/pool.d
-
     declare -A context=(
-        ["name"]="prod"
-        ["version"]=$version
         ["log_errors"]="on"
         ["display_errors"]="off"
     )
-    render "$scriptPath/configs/php-fpm-pool.conf" "$(declare -p context)" "$pools_path/prod.conf"
+    php_create_pool "prod" $version "" "$(declare -p context)"
 
     declare -A context=(
-        ["name"]="dev"
-        ["version"]=$version
         ["log_errors"]="off"
         ["display_errors"]="on"
     )
-    render "$scriptPath/configs/php-fpm-pool.conf" "$(declare -p context)" "$pools_path/dev.conf"
+    php_create_pool "dev" $version "" "$(declare -p context)"
 }
 
 
 php_create_pool()
 {
-    if [ $# -lt 2 ]; then
-        return
+    local usage="
+Usage:
+ php_create_pool <pool_name> [<php_version>] [<user>] [<context>] [<pool_path>]
+"
+
+    if [ $# -lt 1 ]; then
+        echo "$usage" >&2
+        return 1
     fi
 
-    local version=$1
-    local user=$2
+    local pool_name=${1:-""}
+    local version=${2:-"7"}
+    local user=${3:-"www-data"}
+    local user_context=${4:-""}
+    local pool_path=${5:-""}
+
+    if [[ -z $pool_name ]]; then
+        echo "Not passed pool filename!" >&2
+        return 1
+    fi
 
     if [ "$version" != "5" ] && [ "$version" != "7" ] ; then
-        return
+        echo "Invalid PHP version! Use 5 or 7" >&2
+        return 1
     fi
 
-    local scriptPath=$(dirname "$0")
-    local installationPath=$(php_get_installation_path $version)
+    local service_name=$(php_get_service_name "$version")
 
-    if [ "$installationPath" == "" ]; then
-        return
+    if [[ -z $service_name ]]; then
+        echo "PHP-FPM service not found." >&2
+        return 1
     fi
 
-    local cmd=$(php_get_cmd $version)
-    cmd="$cmd-fpm"
-
-    if [ -d "$installationPath/fpm" ]; then
-        if [ ! -f "$installationPath/fpm/pool.d/$username.conf" ]; then
-            $scriptPath/createFPMPool.sh -n $user -v $version > $installationPath/fpm/pool.d/$user.conf
-        fi
-
-        service "$cmd" restart
+    if [[ -z $pool_path ]]; then
+        pool_path="$(php_get_installation_path "$version")/fpm/pool.d"
     fi
+
+    make_dir $pool_path
+
+    declare -A context=(
+        ["group"]=$user
+        ["access_log"]="/var/log/php-fpm/\\\$pool_access.log"
+        ["slow_log"]="/var/log/php-fpm/\\\$pool_slow.log"
+        ["error_log"]="/var/log/php-fpm/\\\$pool_error.log"
+        ["log_errors"]="off"
+        ["display_errors"]="on"
+        ["memory_limit"]="256M"
+        ["tmp_dir"]="/tmp/php-fpm/\\\$pool"
+    )
+
+    if [[ ! -z $user_context ]]; then
+        eval "declare -A user_context="${user_context#*=}
+        local key
+
+        for key in "${!user_context[@]}"; do
+            context[$key]=${user_context[$key]}
+        done
+    fi
+
+    context["name"]=$pool_name
+    context["version"]=$version
+    context["user"]=$user
+
+    make_dir $(dirname ${context[access_log]}) $user
+    make_dir $(dirname ${context[slow_log]}) $user
+    make_dir $(dirname ${context[error_log]}) $user
+    make_dir $(dirname ${context[tmp_dir]}) $user
+
+    render "$(dirname "$0")/configs/php-fpm-pool.conf" "$(declare -p context)" "$pool_path/$user.conf"
+
+    service $service_name restart
+
+    return 0
 }
 
 
