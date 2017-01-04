@@ -1,6 +1,3 @@
-#!/bin/bash
-
-
 ##
 # Confirm action.
 ##
@@ -30,6 +27,43 @@ commandExists()
     else
         return 0
     fi
+}
+
+
+##
+# Создает директорию с родителями с указанным пользователем и режимом.
+##
+make_dir()
+{
+    local dir=${1:-""}
+    local owner=${2:-"root"}
+    local mode=${3:-755}
+
+    if [ -z $dir ]; then
+        return 1
+    fi
+
+    if [ ! -d $dir ]; then
+        mkdir -p $dir
+        chown $owner:$owner $dir
+        chmod $mode $dir
+        return 0
+    fi
+
+    return 1
+}
+
+
+##
+# Возвращает 0, если сервис с указанным именем существует, иначе 1.
+##
+service_exists()
+{
+    if service --status-all | grep -Fq "$1"; then    
+        return 0
+    fi
+
+    return 1
 }
 
 
