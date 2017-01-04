@@ -194,7 +194,7 @@ render()
     local args=""
 
     for key in "${!context[@]}"; do
-        args+="-e \"s/{{ $key }}/${context[$key]}/\" "
+        args+="-e \"s|{{ $key }}|${context[$key]}|\" "
     done
 
     if [ "$out" == "" ]; then
