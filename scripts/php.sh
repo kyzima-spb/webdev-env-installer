@@ -40,6 +40,8 @@ php_update_source_list()
         local sourceList=${APT_SOURCE_DIR}sury-php.list
         local url=https://packages.sury.org/php/
         local key_url=https://packages.sury.org/php/apt.gpg
+        
+        apt-get install apt-transport-https lsb-release ca-certificates
     fi
 
     if ! [ -f $sourceList ]; then
