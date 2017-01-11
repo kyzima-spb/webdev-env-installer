@@ -6,8 +6,12 @@
 # Ubuntu ppa:ondrej/php
 # PHP: 5.5, 5.6, 7.0
 #
-# Debian dotdeb.org + testing
+# 
+# Debian Wheezy -> dotdeb.org
 # PHP: 5.6, 7.0
+# 
+# Debian Jessie, Stretch -> sury.org
+# PHP: 5.6, 7.0, 7.1
 ##
 
 php_update_source_list()
@@ -22,21 +26,28 @@ php_update_source_list()
         return
     fi
 
-    local codenames="wheezy jessie"
-    local sourceList=${APT_SOURCE_DIR}dotdeb.list
-
+    local codenames="wheezy jessie stretch"
+    
     if ! in_list $codenames $CODENAME; then
         return
     fi
+    
+    if [ $CODENAME == "wheezy" ]; then
+        local sourceList=${APT_SOURCE_DIR}dotdeb.list
+        local url=http://packages.dotdeb.org
+        local key_url=https://www.dotdeb.org/dotdeb.gpg
+    else
+        local sourceList=${APT_SOURCE_DIR}sury-php.list
+        local url=https://packages.sury.org/php/
+        local key_url=https://packages.sury.org/php/apt.gpg
+    fi
 
     if ! [ -f $sourceList ]; then
-        local url=http://packages.dotdeb.org
-
         if [ "$(getHttpStatusCode $url/dists/$CODENAME)" != '404' ]; then
             echo deb $url $CODENAME all >> $sourceList
             echo deb-src $url $CODENAME all >> $sourceList
 
-            wget -O - https://www.dotdeb.org/dotdeb.gpg | apt-key add -
+            wget -O - $key_url | apt-key add -
             apt-get update
         fi
     fi
@@ -102,9 +113,11 @@ php_install()
 
     if [[ -z $cmd ]]; then
         php_update_source_list
-        php_find_and_install "7.0"
-        php_fix_config_files "7"
-        php_composer_install
+        
+        if php_find_and_install "7.1 7.0"; then
+            php_fix_config_files "7"
+            php_composer_install
+        fi
     fi
 }
 
@@ -116,11 +129,13 @@ php_5_install()
 {
     local cmd=$(php_get_cmd "5")
 
-    if [ "$cmd" == "" ]; then
+    if [[ -z $cmd ]]; then
         php_update_source_list
-        php_find_and_install "5 5.6 5.5 5.4"
-        php_fix_config_files "5"
-        php_composer_install
+        
+        if php_find_and_install "5 5.6 5.5 5.4"; then
+            php_fix_config_files "5"
+            php_composer_install
+        fi
     fi
 }
 
@@ -258,26 +273,30 @@ Usage:
 
 
 ##
-# Выполняет поиск указанной версии PHP в репозитории и выполняет устанавку
+# Выполняет поиск указанной версии PHP в репозитории и выполняет устанавку.
+# Возвращает 0, если установка прошла успешно и 1 в случаи ошибки.
 ##
 php_find_and_install()
 {
     local version
     local result
     local pkg
-    local cmd="apt-get install -y"
+    local cmd="apt-get install"
 
     for version in $1; do
-        result=$(apt-cache search php${version} | egrep ^php${version}-)
+        result=$(apt-cache pkgnames php${version}-)
 
         if [[ ! -z $result ]]; then
-            for pkg in common cli fpm readline xdebug phpdbg curl intl gmp json mcrypt mysql pgsql sqlite mongo tidy xsl; do
-                cmd+=" $(echo $result | grep -o php${version}-${pkg})"
+            for pkg in common cli fpm readline xdebug phpdbg curl intl gmp json mcrypt mysql pgsql sqlite mongo tidy xsl
+            do
+                cmd+=" $(echo "$result" | egrep ^php${version}-${pkg}$)"
             done
 
             eval "$cmd"
 
-            break
+            return 0
         fi
     done
+
+    return 1
 }
