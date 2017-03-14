@@ -46,8 +46,8 @@ php_update_source_list()
 
     if ! [ -f $sourceList ]; then
         if [ "$(getHttpStatusCode $url/dists/$CODENAME)" != '404' ]; then
-            echo deb $url $CODENAME all >> $sourceList
-            echo deb-src $url $CODENAME all >> $sourceList
+            echo deb $url $CODENAME main >> $sourceList
+            echo deb-src $url $CODENAME main >> $sourceList
 
             wget -O - $key_url | apt-key add -
             apt-get update
